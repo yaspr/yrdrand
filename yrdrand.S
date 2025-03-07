@@ -11,19 +11,19 @@
 .global yrdrand32
 .global yrdrand64
 
-//Check if RDSEED available on CPU
+//Check if RDSEED is available on CPU
 yrdseed_check:
    pushq %rbp
    movq  %rsp, %rbp
 
-   movq  %rbx, %rsi   			# Save RBX 
+   movq  %rbx, %rsi   			# Save RBX before CPUID 
 
    movq  $7,   %rax   			# EAX=7 & ECX=0 for extended CPU features
    xorq  %rcx, %rcx
    cpuid
 
-   mov   $0x40000, %r8d 		# Check if 18th bit (RDSEED bit) is set
-   test  %ebx, %r8d
+   mov   $0x40000, %r8d 		# Check if 18th bit of EBX (RDSEED bit) is set
+   test  %ebx, %r8d			
    jz    yrdseed_check_unavailable    	# RDSEED unavailable on CPU
 
    movq  $1,   %rax			# Return 1 (Available) 
@@ -37,17 +37,17 @@ yrdseed_check_exit:
    popq  %rbp
    ret
 
-//Check if RDRAND is available on CPU (
+//Check if RDRAND is available on CPU
 yrdrand_check:
    pushq %rbp
    movq  %rsp, %rbp
 
    movq  %rbx, %rsi   			# Save RBX before CPUID
 
-   movq  $1,   %rax
+   movq  $1,   %rax			# EAX=1 for CPU info and feature flags
    cpuid
 
-   mov   $0x40000000, %r8d 		# Check if 30th bit (RDRAND bit) is set
+   mov   $0x40000000, %r8d 		# Check if 30th bit of ECX (RDRAND bit) is set
    test  %ecx, %r8d
    jz    yrdrand_check_unavailable    	# RDRAND unavailable on CPU
 
